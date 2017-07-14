@@ -7,7 +7,11 @@ public class Vertex {
 	private int finishTime;
 	private String name;
 	private boolean visited;
+	private boolean visitedForSCC;
+	
+
 	ArrayList <Edge> edges = new ArrayList<Edge>();
+	ArrayList <Edge> reverseEdges = new ArrayList<Edge>();
 	
 	
 	
@@ -16,7 +20,17 @@ public class Vertex {
 		this.finishTime=0;
 		this.discoverTime=0;
 		this.visited=false;
+		this.visitedForSCC=false;
 		
+		
+	}
+
+	public boolean isVisitedForSCC() {
+		return visitedForSCC;
+	}
+
+	public void setVisitedForSCC(boolean visitedForSCC) {
+		this.visitedForSCC = visitedForSCC;
 	}
 
 	/**
@@ -25,6 +39,10 @@ public class Vertex {
 	 */
 	public Iterator getEdgeIterator() {
 		return edges.iterator();
+	}
+	
+	public Iterator getReverseEdgeIterator() {
+		return reverseEdges.iterator();
 	}
 	
 	public Vertex getMinEdgeEndNode() {
@@ -38,12 +56,38 @@ public class Vertex {
 					 minEdge=edge.getEnd();
 						minWeight=edge.getWeight();
 				 }
-			 }else {
-				 edge.setType("F");
 			 }
 			
+			
 		}
+		 if(minEdge !=null) {
+			 Iterator iter1=this.getEdgeIterator();
+			 while(iter1.hasNext()) {
+				 Edge edge=(Edge)iter1.next();
+				 if(edge.getEnd().equals(minEdge)) {
+					 edge.setType("T");
+				 }
+			 }
+		 }
+			
 		return minEdge;
+	}
+	
+	/**
+	 * 
+	 * @return
+	 */
+	public Vertex getSccVertex() {
+		Vertex sccVertex=null;
+		Iterator iter=this.getReverseEdgeIterator();
+		while(iter.hasNext()) {
+			Edge edge=(Edge)iter.next();
+			if(!(edge.getEnd().isVisitedForSCC())) {
+				sccVertex=edge.getEnd();
+				return sccVertex;
+			}
+		}
+		return sccVertex;
 	}
 
 	/**
@@ -53,9 +97,9 @@ public class Vertex {
 		Iterator iter=this.getEdgeIterator();
 		while(iter.hasNext()) {
 			Edge edge=(Edge)iter.next();
-			if (edge.getType() != null) {
+			if (edge.getType() == null) {
 					if((edge.getStart().getDiscoverTime()<edge.getEnd().getDiscoverTime())&&(edge.getStart().getFinishTime()>edge.getEnd().getFinishTime())) {
-						edge.setType("T");
+						edge.setType("F");
 					}else if ((edge.getStart().getDiscoverTime()>edge.getEnd().getDiscoverTime())&&(edge.getStart().getFinishTime()<edge.getEnd().getFinishTime())) {
 						edge.setType("B");
 					}else if((edge.getEnd().getDiscoverTime()<edge.getEnd().getFinishTime())&&(edge.getEnd().getFinishTime()<edge.getStart().getDiscoverTime())&&(edge.getStart().getDiscoverTime()<edge.getStart().getFinishTime())) {
