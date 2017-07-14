@@ -57,7 +57,8 @@ public class FileIO {
       int pointer=0;
       int j=0; 
       Integer number;
-      Stack vertexStack=new Stack();
+      Stack <Vertex> vertexStack=new Stack<Vertex>();
+      Stack <Vertex> reverseStack=new Stack<Vertex>();
      ArrayList <Vertex> vertexesList = new ArrayList <Vertex>();
       
       lineNumber = 0;
@@ -148,8 +149,10 @@ public class FileIO {
         			Vertex start=vertexesList.get(l);
         			Vertex end=vertexesList.get(v);
         			Edge edge=new Edge(start,end);
+        			Edge reverseEdge=new Edge(end,start);
         			edge.setWeight(distance[l][v]);
         			start.edges.add(edge);
+        			end.reverseEdges.add(reverseEdge);
         		}
         	}
         }
@@ -157,7 +160,8 @@ public class FileIO {
      	
         
         
-        FileIO.NDFS(vertexStack, vertexesList.get(0), vertexesList);
+        FileIO.NDFS(vertexStack, reverseStack, vertexesList.get(0), vertexesList);
+       
         
         Iterator <Vertex> iter1= vertexesList.iterator();
         while(iter1.hasNext()) {
@@ -176,8 +180,9 @@ public class FileIO {
         	
         }
         
+        System.out.println();
         
-       
+        FileIO.SCC(reverseStack, vertexesList);
         
         
         //oBuffer.close();
@@ -188,7 +193,7 @@ public class FileIO {
        }
    }
    
-   public static void NDFS(Stack <Vertex> stack, Vertex startNode,  ArrayList <Vertex> vertList ) {
+   public static void NDFS(Stack <Vertex> stack, Stack <Vertex> reverseStack,  Vertex startNode,  ArrayList <Vertex> vertList ) {
 	 
 	   Vertex startVertex;
 	   stack.push(startNode);
@@ -208,11 +213,46 @@ public class FileIO {
 				  stack.push(nextVertex);
 		   }else {
 				  startVertex.setFinishTime(counter);
+				  reverseStack.push(startVertex);
 				  counter++;
 		  }   
 	   }
 	}
-		  
+		
+   
+   /**
+    * 
+    * @param revStack
+    * @param vertList
+    */
+   public static void SCC(Stack <Vertex> revStack, ArrayList <Vertex> vertList ) {
+	   Stack <Vertex> stack=new Stack<Vertex>();
+	   while(!(revStack.isEmpty())){
+		   Vertex start = revStack.pop();
+		 if(!(start.isVisitedForSCC())){
+			 stack.push(start);
+			   while(!(stack.isEmpty())) {
+				   Vertex newStart=stack.pop();
+				   newStart.setVisitedForSCC(true);
+				   Vertex nextVertex = newStart.getSccVertex();
+				   if(nextVertex != null) {
+					   stack.push(newStart);
+					   stack.push(nextVertex);
+				   }else {
+					   System.out.print("" + newStart.getName());
+				 
+			   }
+			 
+			   }
+			   System.out.println();
+			 
+		 }
+		   
+		   
+	   }
+	   
+	   
+   }
 		  
 	  
 	  
